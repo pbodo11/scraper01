@@ -23,12 +23,11 @@ env:
   TIMEOUT_SECONDS: "900"
   MEMORY: "2Gi"
   STRUCTURED_PREFIX: "structured"
-  # Align with extractor.yml
-  RUNTIME_SA: ${{ vars.RUNTIME_SA }}               # function runtime SA (email)
-  DEPLOYER_SA: ${{ vars.DEPLOYER_SA }}             # GitHub deploy SA (email)
+  RUNTIME_SA: ${{ vars.RUNTIME_SA }}
+  DEPLOYER_SA: ${{ vars.DEPLOYER_SA }}
   WORKLOAD_IDENTITY_PROVIDER: ${{ vars.WORKLOAD_IDENTITY_PROVIDER }}
   SCHEDULE_BODY: ${{ vars.MATERIALIZE_BODY || '{}' }}
-  CRON_EXPR: "15 * * * *"                         # :15 each hour
+  CRON_EXPR: "15 * * * *"   # :15 each hour
 
 jobs:
   deploy:
@@ -172,17 +171,25 @@ jobs:
               --oidc-token-audience="${URL}"
           fi
 
+      # Mint an ID token via the Auth action (no TokenCreator needed)
+      - name: Mint ID token for smoke
+        id: auth-smoke
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ env.WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ env.DEPLOYER_SA }}
+          token_format: "id_token"
+          id_token_audience: ${{ steps.cfurl.outputs.url }}
+          id_token_include_email: true
+
       - name: Smoke invoke (authenticated with ID token)
         shell: bash
         run: |
           set -euo pipefail
           URL="${{ steps.cfurl.outputs.url }}"
+          TOKEN="${{ steps.auth-smoke.outputs.id_token }}"
           echo "POST $URL"
-          TOKEN="$(gcloud auth print-identity-token \
-                     --impersonate-service-account='${{ env.DEPLOYER_SA }}' \
-                     --audiences="${URL}")"
           curl -i -sS -X POST "$URL" \
             -H "Authorization: Bearer ${TOKEN}" \
             -H "Content-Type: application/json" \
             -d '${{ env.SCHEDULE_BODY }}' || true
-
