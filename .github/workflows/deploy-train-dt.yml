@@ -40,8 +40,8 @@ jobs:
       - name: Auth (WIF)
         uses: google-github-actions/auth@v2
         with:
-          workload_identity_provider: ${{ env.WORKLOAD_IDENTITY_PROVIDER }}
-          service_account: ${{ env.DEPLOYER_SA }}
+          workload_identity_provider: 'projects/82424024776/locations/global/workloadIdentityPools/github-pool/providers/gh-actions'
+          service_account: 'cf-deployer@project-3e08ac44-4e19-4725-85a.iam.gserviceaccount.com'
           create_credentials_file: true
           export_environment_variables: true
 
