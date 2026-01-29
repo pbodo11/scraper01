@@ -63,9 +63,9 @@ jobs:
         run: |
           set -euo pipefail
           SA_ARGS=()
-          if [[ -n "${RUNTIME_SA:-}" ]]; then
-            gcloud iam service-accounts describe "${RUNTIME_SA}" >/dev/null 2>&1
-            SA_ARGS=(--service-account="${RUNTIME_SA}")
+          if [[ -n cf-runtime@project-3e08ac44-4e19-4725-85a.iam.gserviceaccount.com ]]; then
+            gcloud iam service-accounts describe cf-runtime@project-3e08ac44-4e19-4725-85a.iam.gserviceaccount.com >/dev/null 2>&1
+            SA_ARGS=(--service-account=cf-runtime@project-3e08ac44-4e19-4725-85a.iam.gserviceaccount.com)
           fi
 
           gcloud functions deploy "${FUNCTION_NAME}" \
