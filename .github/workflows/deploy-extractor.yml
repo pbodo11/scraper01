@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - 'cloud_function/extractor/**'
+      - 'cloud_function/extractor-per-listing/**'
       - '.github/workflows/deploy-extractor.yml'
 
 permissions:
@@ -14,21 +14,22 @@ permissions:
 
 env:
   # --------------------------------------------------------
-  # ✅ HARDCODED CONFIGURATION (The Fix)
+  # ✅ HARDCODED CONFIGURATION (Corrected Path)
   # --------------------------------------------------------
   PROJECT_ID: 'project-3e08ac44-4e19-4725-85a'
   REGION: 'us-east1'
   BUCKET_NAME: 'data-pbodo-01'
   
-  # FUNCTION CONFIG (Verify these match your folder structure!)
+  # FUNCTION CONFIG
+  # ✅ UPDATED: Matching your actual folder name
   FUNCTION_NAME: 'extractor-per-listing'
-  FUNCTION_DIR: 'cloud_function/extractor'
+  FUNCTION_DIR: 'cloud_function/extractor-per-listing'
   ENTRY_POINT: 'extractor_per_listing'
   RUNTIME: 'python312'
   TIMEOUT_SECONDS: '300'
   MEMORY: '1Gi'
 
-  # SERVICE ACCOUNTS (Hardcoded to ensure they work)
+  # SERVICE ACCOUNTS (Hardcoded to prevent errors)
   RUNTIME_SA: 'cf-runtime@project-3e08ac44-4e19-4725-85a.iam.gserviceaccount.com'
   DEPLOYER_SA: 'cf-deployer@project-3e08ac44-4e19-4725-85a.iam.gserviceaccount.com'
   WORKLOAD_IDENTITY_PROVIDER: 'projects/82424024776/locations/global/workloadIdentityPools/github-pool/providers/gh-actions'
@@ -70,7 +71,8 @@ jobs:
         run: |
           set -euo pipefail
           
-          # Deploy using hardcoded SA variables
+          echo "🚀 Deploying function from: ${FUNCTION_DIR}"
+          
           gcloud functions deploy "${FUNCTION_NAME}" \
             --gen2 \
             --region="${REGION}" \
